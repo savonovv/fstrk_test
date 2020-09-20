@@ -1,0 +1,26 @@
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.itemInfo {
+  display: flex;
+}
+
+.itemImage {
+  height: 100px;
+  width: 100px;
+}
+
+.discountPrice {
+  display: flex;
+  align-items: center;
+}
+
+.itemQuantity {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}

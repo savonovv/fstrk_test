@@ -1,0 +1,10 @@
+.cartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orderButtons {
+  display: flex;
+  flex-direction: column;
+}
