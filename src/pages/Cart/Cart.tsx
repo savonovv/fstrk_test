@@ -12,6 +12,7 @@ import { priceFormatterFactory, useQuery } from "../../utils";
 import cartStore from "./store";
 import s from "./Cart.module.scss";
 import CartItem from "./components/CartItem/CartItem";
+import { BotRequestPayload } from "../../models/BotRequestPayload";
 
 const Cart: FC = () => {
   const priceFormatter = priceFormatterFactory("ru-RU", { currency: "RUB" });
@@ -19,10 +20,30 @@ const Cart: FC = () => {
   const { cartData, isLoading, redirecting } = cartStore;
   const queryParam = useQuery();
 
-  const chatId = queryParam.get("chat_uuid");
-  const botKey = queryParam.get("bot_key");
-  const onSuccessNode = queryParam.get("on_success_node");
-  const onCloseUrl = queryParam.get("on_close_url");
+  const orderPayload: BotRequestPayload = {
+    get_params: {
+      base_url: "https://designer.fstrk.io/",
+      bot_key: queryParam.get("bot_key"),
+      cart_variable: `cart-${queryParam.get("ecommerce")}`,
+      chat_uuid: queryParam.get("chat_uuid"),
+      ecommerce: queryParam.get("ecommerce"),
+      ecommerce_url: queryParam.get("ecommerce_url"),
+      is_async: false,
+      on_clear_node: null,
+      on_close_url: queryParam.get("on_close_url"),
+      on_success_node: queryParam.get("on_success_node"),
+      primary_color: queryParam.get("primary_color"),
+      widget_origin: null,
+    },
+    is_async: false,
+    node: queryParam.get("on_success_node"),
+  };
+
+  const {
+    chat_uuid: chatId,
+    bot_key: botKey,
+    on_close_url: onCloseUrl,
+  } = orderPayload.get_params;
 
   useEffect(() => {
     getCartData(chatId, botKey);
@@ -75,13 +96,14 @@ const Cart: FC = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => createOrder(chatId, botKey, onSuccessNode)}
+          onClick={() => createOrder(orderPayload)}
           style={{ marginBottom: 10 }}
         >
           Оформить заказ
         </Button>
         <Button
           onClick={() => {
+            // eslint-disable-next-line no-console
             console.log("remove all");
           }}
         >
@@ -93,13 +115,3 @@ const Cart: FC = () => {
 };
 
 export default observer(Cart);
-
-// https://wv.fs5k.com/catalog/
-// ?bot_key=c7736d90-a435-4f22-920a-1f5d9ce77fb3
-// &on_success_node=48955
-// &primary_color=0d92d2
-// &ecommerce_url=https://fasttrack-ecom-fashion.flex.fstrk.io
-// &ecommerce=8f23fa09-c277-424a-9604-f5dd1c859bea
-// &on_close_url=https%3A//refer.id/%3Fbot%3Ddemo_webview_bot%26platform%3Dtelegram%26verbose_name%3D%D0%91%D0%BE%D1%82%20%D0%B4%D0%BB%D1%8F%20%D1%81%D0%BE%D0%B1%D0%B5%D1%81%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B9%26is_close_url%3D1
-// &base_url=https%3A//designer.fstrk.io/
-// &chat_uuid=8a57e481-108d-4449-9452-d9477bc0eec8

@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { action, computed, observable } from "mobx";
 import ENDPOINTS, { BASEURL } from "../../api/endpoints";
+import { BotRequestPayload } from "../../models/BotRequestPayload";
 import { CartDto } from "./Cart.dto";
 
 class CartStore {
@@ -46,13 +47,15 @@ class CartStore {
   };
 
   @action
-  createOrder = async (
-    chatId: string | null,
-    botKey: string | null,
-    onSuccessNode: string | null
-  ) => {
-    if (this.cartData && chatId && botKey && onSuccessNode) {
+  createOrder = async (requestPayload: BotRequestPayload) => {
+    if (this.cartData && requestPayload) {
+      const { chat_uuid: chatId, bot_key: botKey } = requestPayload.get_params;
       const { main, chats } = ENDPOINTS.partners;
+      const config = {
+        headers: {
+          "bot-key": botKey,
+        },
+      };
       const url = `${BASEURL}${main}${chats.main}/${chatId}`;
       axios
         .post(
@@ -60,24 +63,10 @@ class CartStore {
           {
             [`cart-${chatId}`]: this.cartData,
           },
-          {
-            headers: {
-              "bot-key": botKey,
-            },
-          }
+          config
         )
         .then(() => {
-          axios.post(
-            url + chats.push,
-            {
-              node: onSuccessNode,
-            },
-            {
-              headers: {
-                "bot-key": botKey,
-              },
-            }
-          );
+          axios.post(`${url + chats.push}/`, requestPayload, config);
         })
         .then(() => {
           this.redirecting = true;
